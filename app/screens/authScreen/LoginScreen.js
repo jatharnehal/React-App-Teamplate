@@ -14,15 +14,17 @@ import {
 } from 'react-native';
 import background from '../../assets/background.png';
 import logo from '../../assets/logo.png';
-import {useNavigation} from '@react-navigation/native';
 import {ToastUtils} from '../../utils/ToastUtils';
 import CircleProgressIndicator from '../../components/CircleProgressIndicator';
+import {useAuth} from '../../context/authContext';
+import {colors, BASE_URL, ENDPOINT} from '../../constant';
+import {fetchPostData} from '../../services/Api';
 
 const LoginScreen = () => {
-  const [domainID, setDomainID] = useState('');
-  const [password, setPassword] = useState('');
+  const [domainID, setDomainID] = useState('emilys');
+  const [password, setPassword] = useState('emilyspass');
   const [loading, setLoading] = useState(false);
-  const navigation = useNavigation();
+  const {setToken, setUser} = useAuth();
 
   const validateInputs = (domainID, password) => {
     if (!domainID) {
@@ -40,11 +42,27 @@ const LoginScreen = () => {
     if (!validateInputs(domainID, password)) {
       return;
     }
+    setLoading(true);
 
-    navigation.reset({
-      index: 0,
-      routes: [{name: 'Dashboard'}],
-    });
+    const requestBody = {
+      username: domainID,
+      password: password,
+    };
+
+    try {
+      const url = BASE_URL + ENDPOINT.Login;
+
+      const responseData = await fetchPostData(url, requestBody);
+      if (responseData.token) {
+        setToken(responseData.token);
+      } else {
+        ToastUtils.toastMsg('error', responseData.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,7 +141,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 44,
-    borderColor: '#BDBDBD',
+    borderColor: colors.gray,
     borderWidth: 2,
     paddingLeft: 8,
     padding: 12,
@@ -139,7 +157,7 @@ const styles = StyleSheet.create({
     }),
   },
   loginButton: {
-    backgroundColor: '#009F89',
+    backgroundColor: colors.primaryColor,
     padding: 12,
     width: '100%',
     alignSelf: 'center',

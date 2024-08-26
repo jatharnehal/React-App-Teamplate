@@ -1,10 +1,13 @@
-import 'react-native-gesture-handler';
 import AppNavigator from '../app/navigation';
 import {SafeAreaView, StyleSheet} from 'react-native';
+import {AuthProvider} from './context/authContext';
+
 function App() {
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <AppNavigator />
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
     </SafeAreaView>
   );
 }
